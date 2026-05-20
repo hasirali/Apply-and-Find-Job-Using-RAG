@@ -1,12 +1,12 @@
 ﻿import { Router } from 'express';
 import multer from 'multer';
 import fs from 'fs';
-import path from 'path';
 import { extractTextFromPDF } from '../services/pdfParser.js';
+import { chunkResumeText } from '../services/chunker.js';
+import { embedChunks } from '../services/embedder.js';
 
 const router = Router();
 
-// Create uploads folder if it doesn't exist
 if (!fs.existsSync('uploads')) {
   fs.mkdirSync('uploads');
 }
@@ -24,24 +24,30 @@ const upload = multer({ storage: storage });
 
 router.post('/', upload.single('resume'), async function (req, res) {
   try {
-    console.log('File received:', req.file);
 
     // Step 1 — check file exists
     if (!req.file) {
       return res.status(400).json({ error: 'No file received' });
     }
 
-    // Step 2 — extract text from the PDF
+    // Step 2 — extract text from PDF
     const extractedText = await extractTextFromPDF(req.file.path);
 
-    // Step 3 — send back success with text preview
+    // Step 3 — split text into chunks
+    const chunks = await chunkResumeText(extractedText);
+
+    // Step 4 — embed chunks using Gemini
+    const vectors = await embedChunks(chunks);
+
+    // Step 5 — send back response
     res.json({
       success: true,
-      message: 'Resume uploaded and text extracted!',
+      message: 'Resume uploaded, chunked and embedded!',
       filename: req.file.filename,
-      characterCount: extractedText.length,
-      // Show first 300 characters as preview
-      textPreview: extractedText.substring(0, 300)
+      totalChunks: chunks.length,
+      totalVectors: vectors.length,
+      // Show first vector partially so we can verify
+      sampleVector: vectors[0].slice(0, 5)
     });
 
   } catch (error) {
