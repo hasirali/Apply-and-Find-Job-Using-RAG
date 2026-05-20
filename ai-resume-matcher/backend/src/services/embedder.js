@@ -1,32 +1,25 @@
-﻿// Generates Gemini embeddings for text chunks
-// src/services/embedder.js
-// Takes an array of chunks and returns an array of vectors
-
-import { embeddings } from '../config/gemini.js';
+﻿import { embeddings } from '../config/gemini.js';
 
 export async function embedChunks(chunks) {
 
-  console.log(`⏳ Embedding ${chunks.length} chunks...`);
+  console.log(`⏳ Embedding ${chunks.length} chunks one by one...`);
 
-  // embedDocuments takes array of strings
-  // returns array of vectors (one vector per chunk)
-  const vectors = await embeddings.embedDocuments(chunks);
+  const vectors = [];
 
-  console.log(`✅ Generated ${vectors.length} embeddings`);
-  console.log(`✅ Each vector has ${vectors[0].length} dimensions`);
+  // Instead of embedDocuments (which has a bug with this version)
+  // we embed each chunk individually using embedQuery
+  for (let i = 0; i < chunks.length; i++) {
+    const vector = await embeddings.embedQuery(chunks[i]);
+    vectors.push(vector);
+    console.log(`✅ Chunk ${i + 1}/${chunks.length} embedded — dimensions: ${vector.length}`);
+  }
+
+  console.log(`✅ All ${vectors.length} chunks embedded successfully`);
 
   return vectors;
 }
 
-// Embed a single text (we'll use this for job description later)
 export async function embedSingleText(text) {
-
-  console.log('⏳ Embedding single text...');
-
-  // embedQuery is for single text embedding
   const vector = await embeddings.embedQuery(text);
-
-  console.log(`✅ Single text embedded (${vector.length} dimensions)`);
-
   return vector;
 }

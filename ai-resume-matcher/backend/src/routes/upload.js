@@ -39,15 +39,23 @@ router.post('/', upload.single('resume'), async function (req, res) {
     // Step 4 — embed chunks using Gemini
     const vectors = await embedChunks(chunks);
 
-    // Step 5 — send back response
+    // Step 5 — send back response with everything
     res.json({
       success: true,
       message: 'Resume uploaded, chunked and embedded!',
       filename: req.file.filename,
+
+      // From Step 3
+      characterCount: extractedText.length,
+
+      // From Step 4
       totalChunks: chunks.length,
+      chunksPreview: chunks.slice(0, 2),
+
+      // From Step 5
       totalVectors: vectors.length,
-      // Show first vector partially so we can verify
-      sampleVector: vectors[0].slice(0, 5)
+      vectorDimensions: vectors[0] ? vectors[0].length : 0,
+      sampleVector: vectors[0] ? vectors[0].slice(0, 5) : []
     });
 
   } catch (error) {
