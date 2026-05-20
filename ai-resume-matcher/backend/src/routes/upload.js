@@ -1,39 +1,53 @@
-﻿// src/routes/upload.js
-// Handles the PDF upload HTTP request
-
-import { Router } from 'express';
-import { upload } from '../utils/fileHelper.js';
+﻿import { Router } from 'express';
+import multer from 'multer';
+import fs from 'fs';
+import path from 'path';
+import { extractTextFromPDF } from '../services/pdfParser.js';
 
 const router = Router();
 
-// POST /api/upload
-// Expects a multipart/form-data request with a 'resume' field
-router.post('/', upload.single('resume'), (req, res) => {
-  try {
-    // If no file was attached
-    if (!req.file) {
-      return res.status(400).json({ error: 'No file uploaded' });
-    }
-    // req.file is populated by multer with file details
-    res.json({
-      success: true,
-      message: 'Resume uploaded successfully',
-      file: {
-        filename: req.file.filename,
-        originalName: req.file.originalname,
-        size: req.file.size,
-        path: req.file.path
-      }
-    });
+// Create uploads folder if it doesn't exist
+if (!fs.existsSync('uploads')) {
+  fs.mkdirSync('uploads');
+}
 
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/');
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + '-' + file.originalname);
   }
 });
 
-// Keep test route
-router.get('/test', (req, res) => {
-  res.json({ message: 'Upload route working ✅' });
+const upload = multer({ storage: storage });
+
+router.post('/', upload.single('resume'), async function (req, res) {
+  try {
+    console.log('File received:', req.file);
+
+    // Step 1 — check file exists
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file received' });
+    }
+
+    // Step 2 — extract text from the PDF
+    const extractedText = await extractTextFromPDF(req.file.path);
+
+    // Step 3 — send back success with text preview
+    res.json({
+      success: true,
+      message: 'Resume uploaded and text extracted!',
+      filename: req.file.filename,
+      characterCount: extractedText.length,
+      // Show first 300 characters as preview
+      textPreview: extractedText.substring(0, 300)
+    });
+
+  } catch (error) {
+    console.error('Upload error:', error.message);
+    res.status(500).json({ error: error.message });
+  }
 });
 
 export default router;
