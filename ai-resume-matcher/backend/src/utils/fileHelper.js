@@ -1,36 +1,52 @@
-﻿import multer from 'multer';
+﻿// src/utils/fileHelper.js
+// Multer handles multipart/form-data (file uploads)
+// We configure WHERE to save files and WHICH files to accept
+
+import multer from 'multer';
 import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 
-// Tell multer WHERE to save the file and WHAT to name it
+// In ES modules, __dirname doesn't exist by default
+// This is the standard way to recreate it
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Define the uploads folder path (backend/uploads/)
+const uploadDir = path.join(__dirname, '../../uploads');
+
+// Create uploads folder if it doesn't exist
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+// Configure storage — where and how to save files
 const storage = multer.diskStorage({
-
-  // Save files in the uploads folder
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/');
+  destination: (req, file, cb) => {
+    cb(null, uploadDir);
   },
-
-  // Name the file with current time + original name
-  // Example: 1234567890-myresume.pdf
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + '-' + file.originalname);
+  filename: (req, file, cb) => {
+    // Create unique filename: timestamp-originalname
+    // Avoids overwriting if two users upload same filename
+    const uniqueName = `${Date.now()}-${file.originalname}`;
+    cb(null, uniqueName);
   }
-
 });
 
-// Only allow PDF files
-const fileFilter = function (req, file, cb) {
+// File filter — only allow PDFs
+const fileFilter = (req, file, cb) => {
   if (file.mimetype === 'application/pdf') {
-    cb(null, true);  // accept the file
+    cb(null, true); // accept file
   } else {
-    cb(new Error('Please upload a PDF file only'), false);  // reject it
+    cb(new Error('Only PDF files are allowed'), false); // reject file
   }
 };
 
-// Create the multer upload handler
+// Final multer instance
 export const upload = multer({
-  storage: storage,
-  fileFilter: fileFilter,
+  storage,
+  fileFilter,
   limits: {
-    fileSize: 5 * 1024 * 1024  // max 5MB
+    fileSize: 5 * 1024 * 1024 // 5MB max file size
   }
 });
