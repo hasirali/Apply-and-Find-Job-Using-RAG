@@ -1,239 +1,263 @@
-🤖 AI Resume Matcher
-An intelligent full-stack web application that analyzes your resume against any job description using RAG (Retrieval Augmented Generation), Gemini AI, and vector similarity search — giving you ATS scores, matched skills, missing skills, and actionable improvement suggestions.
+# 🤖 AI Resume Matcher
 
-AI Resume Matcher Banner Next.js Node.js LangChain Gemini FAISS
+An intelligent full-stack AI application that analyzes resumes against job descriptions using **RAG (Retrieval-Augmented Generation)**, **Gemini AI**, and **vector similarity search**.
 
-🌐 Live Demo
-Frontend: ai-resume-matcher.vercel.app
-Backend API: ai-resume-matcher-api.onrender.com
-📸 Screenshots
-Home Page — Upload Resume
-Home Page
+It gives:
+- ATS Score
+- Matched Skills
+- Missing Skills
+- Resume Improvement Suggestions
+- AI Summary
 
-Results Page — AI Analysis
-Results Page
+---
 
-✨ Features
-📄 PDF Resume Upload — Upload any resume PDF up to 5MB
-🔍 RAG Pipeline — Resume is chunked, embedded, and stored in a vector database
-🧠 Semantic Search — Job description is matched against resume using vector similarity (not just keywords)
-📊 ATS Score — Get a score from 0-100 showing how well your resume matches
-✅ Matched Skills — See exactly which skills align with the job
-❌ Missing Skills — Know what to add to your resume
-💪 Strengths Analysis — Understand what makes you a strong candidate
-⚠️ Weaknesses Analysis — Know where you need to improve
-💡 Actionable Suggestions — Get specific tips to improve your resume
-📝 AI Summary — Get a human-readable summary of your fit for the role
-🏗️ Architecture
-┌─────────────────────────────────────────────────────────┐
-│                    FRONTEND (Next.js)                    │
-│         Upload PDF + Paste Job Description              │
-└───────────────────────┬─────────────────────────────────┘
-                        │ HTTP POST
-┌───────────────────────▼─────────────────────────────────┐
-│                   BACKEND (Express.js)                   │
-│                                                          │
-│  PDF → pdf-parse → Raw Text                             │
-│      → LangChain Splitter → Chunks                      │
-│      → Gemini Embeddings → Vectors                      │
-│      → FAISS Vector Store → Stored                      │
-│                                                          │
-│  Job Description → Embed → Query Vector                 │
-│                  → FAISS Similarity Search              │
-│                  → Top 3 Relevant Chunks                │
-│                                                          │
-│  Chunks + JD → Gemini LLM → JSON Analysis              │
-└───────────────────────┬─────────────────────────────────┘
-                        │ JSON Response
-┌───────────────────────▼─────────────────────────────────┐
-│              RESULTS PAGE (Next.js)                      │
-│   ATS Score | Skills | Strengths | Suggestions          │
-└─────────────────────────────────────────────────────────┘
-🛠️ Tech Stack
-Frontend
-Technology	Purpose
-Next.js 15	React framework with App Router
-Tailwind CSS v4	Utility-first styling
-Axios	HTTP requests to backend
-Backend
-Technology	Purpose
-Node.js + Express	REST API server
-Multer	PDF file upload handling
-pdf-parse	Extract text from PDF files
-LangChain	Text chunking with RecursiveCharacterTextSplitter
-Google Gemini API	Text embeddings + LLM analysis
-FAISS (faiss-node)	Vector similarity search
-dotenv	Environment variable management
-Morgan	HTTP request logging
-AI / RAG Pipeline
-Technology	Purpose
-@langchain/textsplitters	Split resume into overlapping chunks
-@langchain/google-genai	Gemini embedding model
-@google/generative-ai	Gemini LLM for analysis
-faiss-node	Facebook AI Similarity Search
-text-embedding-004	Gemini embedding model (3072 dimensions)
-gemini-2.0-flash	Gemini chat model for analysis
-📁 Project Structure
+# 🚀 Features
+
+- 📄 Upload Resume PDF
+- 🧠 AI-Powered Resume Analysis
+- 🔍 Semantic Matching using Vector Search
+- 📊 ATS Score Calculation
+- ✅ Matched Skills Detection
+- ❌ Missing Skills Detection
+- 💡 Resume Improvement Suggestions
+- ⚡ Fast and Modern UI
+- 🔗 Full Stack Architecture
+
+---
+
+# 🛠️ Tech Stack
+
+## Frontend
+- Next.js 15
+- Tailwind CSS
+- Axios
+
+## Backend
+- Node.js
+- Express.js
+- Multer
+- pdf-parse
+- LangChain
+- FAISS
+- Gemini AI
+
+## AI / RAG
+- Google Gemini Embeddings
+- Gemini 2.0 Flash
+- FAISS Vector Database
+- RecursiveCharacterTextSplitter
+
+---
+
+# 📁 Project Structure
+
+```bash
 ai-resume-matcher/
 │
 ├── backend/
 │   ├── src/
 │   │   ├── config/
-│   │   │   └── gemini.js          # Gemini AI client setup
+│   │   │   └── gemini.js
 │   │   ├── routes/
-│   │   │   ├── upload.js          # POST /api/upload
-│   │   │   └── analyze.js         # POST /api/analyze
+│   │   │   ├── upload.js
+│   │   │   └── analyze.js
 │   │   ├── services/
-│   │   │   ├── pdfParser.js       # Extract text from PDF
-│   │   │   ├── chunker.js         # Split text into chunks
-│   │   │   ├── embedder.js        # Generate Gemini embeddings
-│   │   │   ├── vectorStore.js     # FAISS operations
-│   │   │   └── analyzer.js        # Gemini LLM analysis
+│   │   │   ├── pdfParser.js
+│   │   │   ├── chunker.js
+│   │   │   ├── embedder.js
+│   │   │   ├── vectorStore.js
+│   │   │   └── analyzer.js
 │   │   ├── utils/
-│   │   │   ├── fileHelper.js      # Multer configuration
-│   │   │   └── promptBuilder.js   # LLM prompt engineering
-│   │   └── app.js                 # Express server entry point
-│   ├── uploads/                   # Temporary PDF storage
-│   ├── data/                      # Persisted vectors + chunks
-│   ├── .env                       # Environment variables
+│   │   │   ├── fileHelper.js
+│   │   │   └── promptBuilder.js
+│   │   └── app.js
+│   │
+│   ├── uploads/
+│   ├── data/
+│   ├── .env
 │   └── package.json
 │
 ├── frontend/
 │   ├── app/
-│   │   ├── page.js                # Home page (upload form)
+│   │   ├── page.js
 │   │   ├── results/
-│   │   │   └── page.js            # Results page
-│   │   ├── layout.js              # Root layout
-│   │   └── globals.css            # Global styles
-│   ├── components/                # Reusable UI components
+│   │   │   └── page.js
+│   │   ├── layout.js
+│   │   └── globals.css
+│   │
+│   ├── components/
 │   ├── lib/
-│   │   └── api.js                 # Axios API calls
-│   └── .env.local                 # Frontend env variables
+│   │   └── api.js
+│   └── .env.local
 │
 └── README.md
-🚀 Getting Started
-Prerequisites
-Node.js v18+
-Google Gemini API Key (free at aistudio.google.com)
-1. Clone the repository
+
+# ⚙️ Installation
+
+## 1. Clone Repository
+
+```bash
 git clone https://github.com/yourusername/ai-resume-matcher.git
 cd ai-resume-matcher
-2. Setup Backend
+```
+
+---
+
+# 🔧 Backend Setup
+
+## Install Dependencies
+
+```bash
 cd backend
 npm install
-Create .env file:
+```
 
+## Create `.env`
+
+```env
 PORT=5000
-GEMINI_API_KEY=your_gemini_api_key_here
+GOOGLE_API_KEY=your_google_gemini_api_key
 FRONTEND_URL=http://localhost:3000
-Start backend:
+```
 
+⚠️ IMPORTANT:
+
+Use:
+
+```env
+GOOGLE_API_KEY=
+```
+
+NOT:
+
+```env
+GEMINI_API_KEY=
+```
+
+Because LangChain Gemini embeddings require `GOOGLE_API_KEY`.
+
+---
+
+## Start Backend
+
+```bash
 npm run dev
-3. Setup Frontend
+```
+
+Backend runs on:
+
+```bash
+http://localhost:5000
+```
+
+---
+
+# 💻 Frontend Setup
+
+## Install Dependencies
+
+```bash
 cd ../frontend
 npm install
-Create .env.local file:
+```
 
+## Create `.env.local`
+
+```env
 NEXT_PUBLIC_API_URL=http://localhost:5000
-Start frontend:
+```
 
+---
+
+## Start Frontend
+
+```bash
 npm run dev
-4. Open the app
+```
+
+Frontend runs on:
+
+```bash
 http://localhost:3000
-🔌 API Endpoints
-Upload Resume
-POST /api/upload
-Content-Type: multipart/form-data
+```
 
-Body: resume (file) — PDF only, max 5MB
-Response:
+---
 
-{
-  "success": true,
-  "message": "Resume uploaded, chunked, embedded and stored!",
-  "filename": "1234567890-resume.pdf",
-  "characterCount": 3150,
-  "totalChunks": 8,
-  "totalVectors": 8,
-  "vectorDimensions": 3072,
-  "storedInDB": 8
-}
-Analyze Resume
-POST /api/analyze
-Content-Type: application/json
+# 🧠 How RAG Works
 
-{
-  "jobDescription": "We are looking for a React developer..."
-}
-Response:
+## 1. Resume Upload
 
-{
-  "success": true,
-  "analysis": {
-    "atsScore": 85,
-    "matchedSkills": ["React.js", "Node.js", "Azure"],
-    "missingSkills": ["AWS"],
-    "strengths": ["Strong full-stack experience..."],
-    "weaknesses": ["Missing AWS experience..."],
-    "suggestions": ["Add AWS certification..."],
-    "summary": "Strong candidate with..."
-  }
-}
-Health Check
-GET /api/health
-🧠 How RAG Works in This Project
-1. INDEXING (on resume upload):
-   PDF → Extract Text → Split into Chunks → Embed with Gemini
-   → Store vectors in FAISS
+```text
+PDF → Text Extraction → Chunking → Embeddings → FAISS Storage
+```
 
-2. RETRIEVAL (on analyze):
-   Job Description → Embed → Query FAISS
-   → Find Top 3 Most Semantically Similar Resume Chunks
+## 2. Job Description Analysis
 
-3. GENERATION (with Gemini LLM):
-   Top 3 Chunks + Job Description → Structured Prompt
-   → Gemini generates ATS Score, Skills, Suggestions
-This approach is superior to keyword matching because it understands meaning:
+```text
+Job Description → Embedding → Similarity Search → Top Resume Chunks
+```
 
-"React developer" matches "built UI components with hooks"
-"Cloud experience" matches "Azure VM administration"
-"Team collaboration" matches "agile environment"
-🔮 Future Improvements
- User authentication (save multiple resumes)
- Resume history and comparison
- Cover letter generator
- Download analysis as PDF
- Support for multiple file formats (DOCX, TXT)
- Job description scraper (paste URL instead of text)
- Interview questions generator based on gaps
- Resume rewrite suggestions with AI
-📄 Environment Variables
-Backend .env
-Variable	Description	Required
-PORT	Server port (default: 5000)	No
-GEMINI_API_KEY	Google Gemini API key	Yes
-FRONTEND_URL	Frontend URL for CORS	No
-Frontend .env.local
-Variable	Description	Required
-NEXT_PUBLIC_API_URL	Backend API URL	Yes
-🤝 Contributing
-Fork the repository
-Create your feature branch (git checkout -b feature/AmazingFeature)
-Commit your changes (git commit -m 'Add AmazingFeature')
-Push to the branch (git push origin feature/AmazingFeature)
-Open a Pull Request
-📜 License
-Distributed under the MIT License. See LICENSE for more information.
+## 3. AI Generation
 
-👨‍💻 Author
-Hasir Ali
+```text
+Resume Chunks + Job Description → Gemini AI → ATS Analysis
+```
 
-Portfolio: your-portfolio.com
-LinkedIn: linkedin.com/in/hasirali
-GitHub: github.com/hasirali
-Email: hasira804@gmail.com
-⭐ Show Your Support
-If this project helped you, please give it a ⭐ on GitHub!
+---
 
-Built with ❤️ using Google Gemini AI, LangChain, FAISS, Next.js, and Express.js
+# 📦 Required Packages
 
+## Backend
+
+```bash
+npm install express cors dotenv multer morgan pdf-parse
+npm install @google/generative-ai
+npm install @langchain/google-genai
+npm install @langchain/community
+npm install @langchain/textsplitters
+npm install langchain
+npm install faiss-node
+```
+
+## Frontend
+
+```bash
+npm install axios
+```
+
+---
+
+# 🌟 Future Improvements
+
+- User Authentication
+- Resume History
+- Cover Letter Generator
+- PDF Export
+- DOCX Support
+- AI Resume Rewrite
+- Interview Question Generator
+
+---
+
+# 👨‍💻 Author
+
+## Hasir Ali
+
+- GitHub: https://github.com/yourusername
+- LinkedIn: https://linkedin.com/in/yourprofile
+
+---
+
+# ⭐ Support
+
+If you like this project, give it a ⭐ on GitHub.
+
+---
+
+Built with ❤️ using:
+
+- Gemini AI
+- LangChain
+- FAISS
+- Next.js
+- Express.js
