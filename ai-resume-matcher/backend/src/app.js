@@ -31,6 +31,7 @@ app.get('/api/health', async (req, res) => {
 app.use('/api/upload', uploadRoutes);
 app.use('/api/analyze', analyzeRoutes);
 
+
 // 404 handler for unknown routes.
 app.use(async (req, res) => {
   res.status(404).json({
